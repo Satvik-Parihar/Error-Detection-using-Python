@@ -19,11 +19,22 @@ The application provides interactive simulations and theoretical explanations fo
 
 ## Setup Instructions
 
-### Prerequisites
--   Node.js and npm installed.
--   Python 3.x installed.
+### One-Command Start (Recommended)
+1.  Ensure you have **Node.js** and **Python** installed.
+2.  Install all dependencies (frontend & backend) if you haven't already:
+    ```bash
+    npm run install:all
+    ```
+3.  Run the entire project with a single command:
+    ```bash
+    npm start
+    ```
+    This will launch both the backend (port 8000) and frontend (port 5173).
 
-### Backend Setup
+---
+### Manual Setup
+
+#### Backend
 1.  Navigate to the `backend` directory:
     ```bash
     cd backend
@@ -36,9 +47,8 @@ The application provides interactive simulations and theoretical explanations fo
     ```bash
     uvicorn main:app --reload
     ```
-    The backend runs on `http://localhost:8000`.
 
-### Frontend Setup
+#### Frontend
 1.  Navigate to the `frontend` directory:
     ```bash
     cd frontend
@@ -51,10 +61,9 @@ The application provides interactive simulations and theoretical explanations fo
     ```bash
     npm run dev
     ```
-    The frontend runs on `http://localhost:5173`.
 
 ## Usage
-1.  Open the web application.
+1.  Open the web application (auto-opens or go to `http://localhost:5173`).
 2.  Select an Error Detection technique from the navigation.
 3.  Read the theory to understand the concept.
 4.  Enter input data to see the algorithm in action.
