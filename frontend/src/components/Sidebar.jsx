@@ -12,7 +12,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     return (
         <div className="sidebar">
             <div className="brand">
-                <span style={{ fontSize: '2rem' }}>🛡️</span>
+                <img src="/logo.svg" alt="Logo" style={{ width: '40px', height: '40px' }} />
                 ErrorDetect
             </div>
 
