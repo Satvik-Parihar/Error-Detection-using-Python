@@ -13,7 +13,7 @@ const VRC = () => {
             const res = await axios.post('http://localhost:8000/api/vrc', { data, even_parity: evenParity });
             setResult(res.data);
         } catch (err) {
-            setError('Error calculating VRC');
+            setError(err.response?.data?.detail || 'Error calculating VRC');
             console.error(err);
         }
     };

@@ -12,8 +12,8 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     return (
         <div className="sidebar">
             <div className="brand">
-                <img src="/logo.svg" alt="Logo" style={{ width: '40px', height: '40px' }} />
-                ErrorDetect
+                <img src="/logo.svg" alt="Logo" style={{ width: '48px', height: '48px' }} />
+                Error Detection
             </div>
 
             <div className="nav-menu">
@@ -28,10 +28,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
                 ))}
             </div>
 
-            <div style={{ marginTop: 'auto', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                <p>CN Project</p>
-                <p>Satvik Parihar</p>
-            </div>
+            {/* Footer removed as requested */}
         </div>
     );
 };
