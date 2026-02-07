@@ -27,8 +27,6 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
                     </div>
                 ))}
             </div>
-
-            {/* Footer removed as requested */}
         </div>
     );
 };

@@ -143,11 +143,10 @@ def hamming_encode(data: str) -> dict:
     # Place data bits
     j = 0
     data_reversed = data[::-1] # D1 is LSB? Or MSB? usually D1..Dn. Let's assume input text order.
-    # Actually standard texts use D_n...D_1. Let's assume input is correct order.
     # We place data bits in non-power-of-2 positions.
     
     # 1-based index mapping
-    # p1, p2, d1, p4, d2, d3, d4, p8...
+    # p1, p2, d3, p4, d5, d6, d7, p8...
     
     data_idx = 0
     parity_indices = []
@@ -171,13 +170,20 @@ def hamming_encode(data: str) -> dict:
         
         for i in range(1, total_len + 1):
             if (i & p) == p: # if position i has p bit set
-                covered_indices.append(str(i))
+                # Determine bit name based on position
+                if (i & (i - 1)) == 0:
+                    bit_name = f"p{i}"
+                else:
+                    bit_name = f"d{i}"
+                
+                covered_indices.append(bit_name)
+                
                 val = codeword[i]
                 # If it's the parity bit position itself, it's currently 0 placeholder
                 if i == p:
-                    bit_values.append(f"P{p}(?)")
+                    bit_values.append(f"{bit_name}(?)")
                 else:
-                    bit_values.append(val)
+                    bit_values.append(f"{bit_name}({val})")
                 
                 if val == '1':
                      xor_val ^= 1
@@ -185,9 +191,9 @@ def hamming_encode(data: str) -> dict:
         codeword[p] = str(xor_val)
         
         steps.append({
-            "parity": f"P{p}",
+            "parity": f"p{p}",
             "covered": ", ".join(covered_indices),
-            "bits_str": " + ".join(bit_values), # e.g. P1(?) + 1 + 0 + 1
+            "bits_str": " + ".join(bit_values), # e.g. p1(?) + d3(1) + d5(0)
             "result": str(xor_val)
         })
         
