@@ -36,8 +36,17 @@ class LRCRequest(BaseModel):
     data_blocks: List[str]
     even_parity: bool = True
 
+class LRCVerifyRequest(BaseModel):
+    data_blocks: List[str]
+    received_lrc: str
+    even_parity: bool = True
+
 class CRCRequest(BaseModel):
     data: str
+    divisor: str
+
+class CRCVerifyRequest(BaseModel):
+    codeword: str
     divisor: str
 
 class ChecksumRequest(BaseModel):
@@ -47,6 +56,9 @@ class ChecksumRequest(BaseModel):
 class HammingRequest(BaseModel):
     data: str
 
+class HammingVerifyRequest(BaseModel):
+    codeword: str
+
 @app.get("/")
 def read_root():
     return {"message": "Error Detection API is running"}
@@ -54,7 +66,6 @@ def read_root():
 @app.post("/api/vrc")
 def get_vrc(req: VRCRequest):
     try:
-        # Basic validation
         if not all(c in '01' for c in req.data):
              raise ValueError("Input must be binary (0s and 1s only)")
         return logic.calculate_vrc(req.data, req.even_parity)
@@ -75,6 +86,14 @@ def get_lrc(req: LRCRequest):
         logger.error(f"LRC Error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
+@app.post("/api/lrc/verify")
+def verify_lrc(req: LRCVerifyRequest):
+    try:
+        return logic.verify_lrc(req.data_blocks, req.received_lrc, req.even_parity)
+    except Exception as e:
+        logger.error(f"LRC Verify Error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
 @app.post("/api/crc")
 def get_crc(req: CRCRequest):
     try:
@@ -83,6 +102,16 @@ def get_crc(req: CRCRequest):
         return logic.calculate_crc(req.data, req.divisor)
     except Exception as e:
         logger.error(f"CRC Error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/crc/verify")
+def verify_crc(req: CRCVerifyRequest):
+    try:
+        if not all(c in '01' for c in req.codeword) or not all(c in '01' for c in req.divisor):
+            raise ValueError("Codeword and Divisor must be binary")
+        return logic.verify_crc(req.codeword, req.divisor)
+    except Exception as e:
+        logger.error(f"CRC Verify Error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/api/checksum")
@@ -95,13 +124,33 @@ def get_checksum(req: ChecksumRequest):
         logger.error(f"Checksum Error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
+@app.post("/api/checksum/verify")
+def verify_checksum(req: ChecksumRequest):
+    try:
+        if not all(c in '01' for c in req.data):
+                raise ValueError("Input must be binary")
+        # Reuse calculate_checksum logic but via verify wrapper
+        return logic.verify_checksum(req.data, req.block_size)
+    except Exception as e:
+        logger.error(f"Checksum Verify Error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
 @app.post("/api/hamming")
 def get_hamming(req: HammingRequest):
     try:
         if not all(c in '01' for c in req.data):
              raise ValueError("Input must be binary")
         return logic.hamming_encode(req.data)
-        # Actually logic.py has `hamming_encode`. Let me fix that name below.
     except Exception as e:
         logger.error(f"Hamming Error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/hamming/verify")
+def verify_hamming(req: HammingVerifyRequest):
+    try:
+        if not all(c in '01' for c in req.codeword):
+             raise ValueError("Codeword must be binary")
+        return logic.verify_hamming(req.codeword)
+    except Exception as e:
+        logger.error(f"Hamming Verify Error: {e}")
         raise HTTPException(status_code=400, detail=str(e))

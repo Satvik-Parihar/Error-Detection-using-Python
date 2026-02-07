@@ -41,51 +41,88 @@ def calculate_lrc(data_blocks: list[str], even_parity: bool = True) -> dict:
         "result": data_blocks + [lrc_str]
     }
 
+def verify_lrc(data_blocks: list[str], received_lrc: str, even_parity: bool = True) -> dict:
+    calc_res = calculate_lrc(data_blocks, even_parity)
+    calculated_lrc = calc_res["lrc"]
+    is_valid = calculated_lrc == received_lrc
+    
+    return {
+        "calculated_lrc": calculated_lrc,
+        "received_lrc": received_lrc,
+        "is_valid": is_valid
+    }
+
+def binary_division(dividend: str, divisor: str):
+    n = len(divisor)
+    # We iterate such that we process every bit of the original dividend (message)
+    # as the MSB of the current window.
+    # The 'dividend' passed here is usually padded.
+    # Loop length: len(dividend) - n + 1
+    
+    tmp = dividend[0:n]
+    quotient = []
+    steps = []
+    
+    def xor(a, b):
+        res = []
+        for i in range(1, len(b)):
+            res.append('0' if a[i] == b[i] else '1')
+        return "".join(res)
+    
+    for i in range(len(dividend) - n + 1):
+        if tmp[0] == '1':
+            quotient.append('1')
+            res = xor(divisor, tmp)
+            current_divisor = divisor
+        else:
+            quotient.append('0')
+            res = xor('0' * n, tmp)
+            current_divisor = '0' * n
+            
+        steps.append({
+            "current_dividend": tmp,
+            "divisor": current_divisor,
+            "quotient_bit": quotient[-1],
+            "result_xor": res
+        })
+        
+        if i + n < len(dividend):
+            tmp = res + dividend[i + n]
+        else:
+            tmp = res
+            
+    return tmp, "".join(quotient), steps
+
 def calculate_crc(data: str, divisor: str) -> dict:
-    """
-    Calculates Cyclic Redundancy Check (CRC).
-    """
     n = len(divisor)
     padded_data = data + '0' * (n - 1)
     
-    def xor(a, b):
-        result = []
-        for i in range(1, len(b)):
-            if a[i] == b[i]:
-                result.append('0')
-            else:
-                result.append('1')
-        return "".join(result)
-    
-    pick = padded_data[:n]
-    steps = []
-    
-    tmp = pick
-    for i in range(len(data)):
-        steps.append({"current_dividend": tmp, "divisor": divisor if tmp[0] == '1' else '0'*n})
-        
-        if tmp[0] == '1':
-            tmp = xor(divisor, tmp) + padded_data[n + i] if n + i < len(padded_data) else xor(divisor, tmp)
-        else:
-            tmp = xor('0' * n, tmp) + padded_data[n + i] if n + i < len(padded_data) else xor('0' * n, tmp)
-            
-    remainder = tmp
-    codeword = data + remainder
+    remainder, quotient, steps = binary_division(padded_data, divisor)
     
     return {
         "data": data,
         "divisor": divisor,
         "remainder": remainder,
+        "quotient": quotient,
+        "codeword": data + remainder,
+        "steps": steps
+    }
+
+def verify_crc(codeword: str, divisor: str) -> dict:
+    remainder, quotient, steps = binary_division(codeword, divisor)
+    is_valid = all(c == '0' for c in remainder)
+    
+    return {
         "codeword": codeword,
+        "divisor": divisor,
+        "remainder": remainder,
+        "quotient": quotient,
+        "is_valid": is_valid,
         "steps": steps
     }
 
 def calculate_checksum(data: str, block_size: int = 8) -> dict:
-    """
-    Calculates Checksum.
-    Splits data into block_size chunks, sums them, wraps carry, takes 1's complement.
-    """
-    # Pad data if needed
+    # Need to handle padding if data length not multiple of block_size
     if len(data) % block_size != 0:
         data = data.zfill((len(data) // block_size + 1) * block_size)
         
@@ -99,11 +136,6 @@ def calculate_checksum(data: str, block_size: int = 8) -> dict:
         steps.append(f"Add {block} ({val}) to sum {current_sum}")
         current_sum += val
         
-        # Handle wrap around immediately or after? usually add all then wrap
-        # Standard checksum: sum all, then fold carry
-        
-    # Handling carry for k-bit checksum
-    # While sum > max_val, add carry
     max_val = (1 << block_size) - 1
     
     steps.append(f"Total Sum (raw): {current_sum} ({bin(current_sum)[2:]})")
@@ -124,27 +156,30 @@ def calculate_checksum(data: str, block_size: int = 8) -> dict:
         "steps": steps
     }
 
+def verify_checksum(data: str, block_size: int = 8) -> dict:
+    # data includes checkusm
+    res = calculate_checksum(data, block_size)
+    # If valid, final checksum (of data+sent_checksum) should be 0 because Sum is all 1s
+    is_valid = all(c == '0' for c in res["checksum"])
+    
+    return {
+        "calculated_sum": res["sum"],
+        "calculated_checksum": res["checksum"],
+        "is_valid": is_valid,
+        "steps": res["steps"]
+    }
+
 def normalize_bits(val, width):
     return val & ((1 << width) - 1)
 
 def hamming_encode(data: str) -> dict:
-    """
-    Hamming Code Encoding (General for any length, using standard placement).
-    """
     m = len(data)
     r = 0
-    # Calculate number of redundancy bits needed: 2^r >= m + r + 1
     while (1 << r) < (m + r + 1):
         r += 1
         
     total_len = m + r
-    codeword = ['0'] * (total_len + 1) # 1-based indexing for easier calc
-    
-    # Place data bits
-    # We place data bits in non-power-of-2 positions.
-    
-    # 1-based index mapping
-    # p1, p2, d3, p4, d5, d6, d7, p8...
+    codeword = ['0'] * (total_len + 1)
     
     data_idx = 0
     parity_indices = []
@@ -157,27 +192,19 @@ def hamming_encode(data: str) -> dict:
                 codeword[i] = data[data_idx]
                 data_idx += 1
     
-    # Calculate parity bits on even parity
     steps = []
-    
     for p in parity_indices:
-        # Check bits where p-th bit is set
         xor_val = 0
         covered_indices = []
         bit_values = []
-        
         for i in range(1, total_len + 1):
-            if (i & p) == p: # if position i has p bit set
-                # Determine bit name based on position
+            if (i & p) == p:
                 if (i & (i - 1)) == 0:
                     bit_name = f"p{i}"
                 else:
                     bit_name = f"d{i}"
-                
                 covered_indices.append(bit_name)
-                
                 val = codeword[i]
-                # If it's the parity bit position itself, it's currently 0 placeholder
                 if i == p:
                     bit_values.append(f"{bit_name}(?)")
                 else:
@@ -187,21 +214,71 @@ def hamming_encode(data: str) -> dict:
                      xor_val ^= 1
         
         codeword[p] = str(xor_val)
-        
         steps.append({
             "parity": f"p{p}",
             "covered": ", ".join(covered_indices),
-            "bits_str": " + ".join(bit_values), # e.g. p1(?) + d3(1) + d5(0)
+            "bits_str": " + ".join(bit_values),
             "result": str(xor_val)
         })
         
     final_code = "".join(codeword[1:])
-    
     return {
         "data": data,
         "redundancy_bits": r,
         "total_length": total_len,
         "codeword": final_code,
         "parity_positions": parity_indices,
+        "steps": steps
+    }
+
+def verify_hamming(codeword: str) -> dict:
+    n = len(codeword)
+    # Calculate number of parity bits 'r' based on length n?
+    # Actually, we just need to check all powers of 2 less than n.
+    syndrome = 0
+    steps = []
+    
+    parity_indices = []
+    i = 1
+    while i <= n:
+        parity_indices.append(i)
+        i *= 2
+        
+    for p in parity_indices:
+        xor_val = 0
+        for i in range(1, n + 1):
+            if (i & p) == p:
+                if codeword[i-1] == '1':
+                    xor_val ^= 1
+        
+        if xor_val != 0:
+            syndrome += p
+            
+        steps.append({
+            "parity": f"p{p}",
+            "check_val": xor_val 
+        })
+        
+    status = "ACCEPTED"
+    error_pos = None
+    corrected_codeword = codeword
+    
+    if syndrome != 0:
+        error_pos = syndrome
+        if error_pos <= n:
+            status = "ERROR CORRECTED"
+            chars = list(codeword)
+            # Flip bit at syndrome position (1-based index)
+            chars[error_pos - 1] = '1' if chars[error_pos - 1] == '0' else '0'
+            corrected_codeword = "".join(chars)
+        else:
+            status = "DETECTED (UNCORRECTABLE)"
+            
+    return {
+        "codeword": codeword,
+        "syndrome": syndrome,
+        "error_position": error_pos,
+        "corrected_codeword": corrected_codeword,
+        "status": status,
         "steps": steps
     }
