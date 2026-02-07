@@ -1,7 +1,16 @@
-node_modules
-dist
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# NodeJS
+node_modules/
+dist/
 .DS_Store
-__pycache__
-venv
-env
-*.pyc
+
+# Temporary Files
+~$*
+*.tmp
+*.log
