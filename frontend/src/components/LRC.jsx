@@ -173,13 +173,15 @@ const LRC = () => {
                     <h2 className="card-title">Theory & Method</h2>
                     <div className="theory-text">
                         <p>
-                            In LRC, a block of parity bits is generated. Key advantages include improved detection capability compared to VRC.
-                            It can detect burst errors (checking across columns).
+                            LRC organizes data into a table (rows and columns) and calculates parity for each column.
                         </p>
-                        <h3>Steps:</h3>
-                        1. Arrange data words in rows.<br />
-                        2. Calculate parity for each column.<br />
-                        3. The resulting sequence of parity bits forms the LRC.
+                        <h3>Key Points:</h3>
+                        <ul>
+                            <li>Data is arranged in a matrix of rows and columns.</li>
+                            <li>Parity bit is calculated for each column.</li>
+                            <li>The sequence of these parity bits forms the LRC block.</li>
+                            <li>It improves upon VRC by detecting burst errors.</li>
+                        </ul>
                     </div>
                 </div>
             </div>

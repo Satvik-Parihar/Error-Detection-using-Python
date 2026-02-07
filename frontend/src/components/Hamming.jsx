@@ -122,10 +122,20 @@ const Hamming = () => {
                     <h2 className="card-title">Theory & Method</h2>
                     <div className="theory-text">
                         <p>
-                            Hamming codes insert r parity bits at positions 1, 2, 4, 8... to protect m data bits.
+                            Hamming codes add redundant bits at specific positions to enable error detection and correction.
                         </p>
                         <h3>Formula:</h3>
-                        2^r ≥ m + r + 1
+                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', fontFamily: 'monospace', fontSize: '1.2rem', textAlign: 'center', margin: '1rem 0' }}>
+                            2<sup>r</sup> ≥ m + r + 1
+                        </div>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Where 'r' is redundancy bits and 'm' is data length.</p>
+
+                        <h3>Key Points:</h3>
+                        <ul>
+                            <li>Redundant bits are placed at power-of-2 positions (1, 2, 4, 8...).</li>
+                            <li>Each parity bit checks a specific set of bits in the codeword.</li>
+                            <li>Can detect up to 2-bit errors and correct 1-bit errors (SEC-DED).</li>
+                        </ul>
                     </div>
                 </div>
             </div>

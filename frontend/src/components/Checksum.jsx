@@ -221,17 +221,19 @@ const Checksum = () => {
                     <h2 className="card-title">Theory & Method</h2>
                     <div className="theory-text">
                         <p>
-                            The checksum is calculated by summing the data segments and taking the 1's complement of the result.
+                            A Checksum is a block of data derived from another block of data to detect errors during transmission or storage.
                         </p>
-                        <h3>Steps:</h3>
-                        1. Divide data into k segments of equal m bits.<br />
-                        2. Sum all segments using 1's complement arithmetic.<br />
-                        3. Complement the final sum to get the Checksum.
+                        <h3>Key Points:</h3>
+                        <ul>
+                            <li>Data is divided into k segments of equal m bits.</li>
+                            <li>Segments are summed using 1's complement arithmetic.</li>
+                            <li>The final sum is complemented to get the Checksum.</li>
+                            <li>If the receiver's checksum is all 0s, the data is accepted.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
-    );
+            );
 };
 
-export default Checksum;
+            export default Checksum;

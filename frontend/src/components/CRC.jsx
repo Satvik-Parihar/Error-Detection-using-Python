@@ -133,13 +133,15 @@ const CRC = () => {
                     <h2 className="card-title">Theory & Method</h2>
                     <div className="theory-text">
                         <p>
-                            CRC uses modulo-2 arithmetic (XOR operation, no carry).
+                            CRC is based on binary division. A sequence of redundant bits, called the CRC remainder, is appended to the end of a data unit.
                         </p>
-                        <h3>Steps:</h3>
-                        1. Append (n-1) zeros to data, where n is divisor length.<br />
-                        2. Perform binary division of padded data by divisor.<br />
-                        3. The remainder is the CRC.<br />
-                        4. Append CRC to original data.
+                        <h3>Key Points:</h3>
+                        <ul>
+                            <li>(n-1) zeros are appended to the data (where n is divisor length).</li>
+                            <li>Binary division is performed on the padded data.</li>
+                            <li>The remainder of the division is the CRC.</li>
+                            <li>CRC is appended to the original data for transmission.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
