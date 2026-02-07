@@ -10,6 +10,8 @@
   --text-muted: #94a3b8;
   --border-color: rgba(255, 255, 255, 0.08);
   --glass: rgba(15, 23, 42, 0.6);
+  --error: #f87171;
+  --success: #4ade80;
 }
 
 * {
@@ -109,6 +111,7 @@ body {
   margin: 0 0 1rem 0;
   background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -1px;
 }
@@ -357,4 +360,168 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* Calculation Terminal View */
+.terminal-container {
+  background: #0d1117;
+  /* GitHub dark mode background roughly */
+  border-radius: 12px;
+  padding: 1.5rem;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.95rem;
+  color: #c9d1d9;
+  border: 1px solid var(--border-color);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.terminal-step {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.terminal-step:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.terminal-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.terminal-label {
+  color: var(--primary);
+  /* Use primary color for labels */
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+  opacity: 0.8;
+}
+
+.terminal-value {
+  color: #fff;
+  letter-spacing: 2px;
+}
+
+.terminal-op {
+  color: var(--secondary);
+  font-weight: 600;
+}
+
+/* Step List Visualization */
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-card {
+  background: rgba(2, 6, 23, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.step-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.step-icon.add {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+}
+
+.step-icon.wrap {
+  background: rgba(236, 72, 153, 0.1);
+  color: var(--secondary);
+}
+
+.step-icon.total {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--success);
+}
+
+.step-details {
+  flex: 1;
+}
+
+.step-title {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.step-data {
+  color: #fff;
+  font-family: 'Outfit', monospace;
+  font-size: 1.1rem;
+}
+
+.step-data .mono {
+  margin-right: 0.5rem;
+  letter-spacing: 1px;
+}
+
+.step-data .dec {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.step-result {
+  text-align: right;
+  min-width: 100px;
+}
+
+.step-result .label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.step-result .value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.step-result .mono-sm {
+  display: block;
+  font-size: 0.85rem;
+  font-family: monospace;
+  color: var(--primary);
+}
+
+.step-item-raw {
+  padding: 0.5rem;
+  font-family: monospace;
+  opacity: 0.7;
+  border-bottom: 1px dashed var(--border-color);
 }

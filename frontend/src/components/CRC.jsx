@@ -6,8 +6,39 @@ const CRC = () => {
     const [divisor, setDivisor] = useState('');
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+    const [validationErrors, setValidationErrors] = useState({});
+
+    const validate = (name, value) => {
+        if (!value) return 'Required';
+        if (!/^[01]+$/.test(value)) return 'Must be binary (0/1)';
+        return null;
+    };
+
+    const handleDataChange = (e) => {
+        const val = e.target.value;
+        setData(val);
+        const err = validate('data', val);
+        setValidationErrors(prev => ({ ...prev, data: err }));
+        setResult(null);
+    };
+
+    const handleDivisorChange = (e) => {
+        const val = e.target.value;
+        setDivisor(val);
+        const err = validate('divisor', val);
+        setValidationErrors(prev => ({ ...prev, divisor: err }));
+        setResult(null);
+    };
 
     const handleCalculate = async () => {
+        const dataErr = validate('data', data);
+        const divErr = validate('divisor', divisor);
+
+        if (dataErr || divErr) {
+            setValidationErrors({ data: dataErr, divisor: divErr });
+            return;
+        }
+
         try {
             setError(null);
             const res = await axios.post('http://localhost:8000/api/crc', { data, divisor });
@@ -37,9 +68,11 @@ const CRC = () => {
                             type="text"
                             className="input-field"
                             value={data}
-                            onChange={(e) => setData(e.target.value)}
+                            onChange={handleDataChange}
                             placeholder="e.g. 100100"
+                            style={validationErrors.data ? { borderColor: 'var(--error)' } : {}}
                         />
+                        {validationErrors.data && <div style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.25rem' }}>{validationErrors.data}</div>}
                     </div>
 
                     <div className="input-group">
@@ -48,9 +81,11 @@ const CRC = () => {
                             type="text"
                             className="input-field"
                             value={divisor}
-                            onChange={(e) => setDivisor(e.target.value)}
+                            onChange={handleDivisorChange}
                             placeholder="e.g. 1101"
+                            style={validationErrors.divisor ? { borderColor: 'var(--error)' } : {}}
                         />
+                        {validationErrors.divisor && <div style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.25rem' }}>{validationErrors.divisor}</div>}
                     </div>
 
                     <button className="btn-primary" onClick={handleCalculate}>Calculate CRC</button>
@@ -66,13 +101,25 @@ const CRC = () => {
                                 <span>{result.codeword}</span>
                             </div>
 
-                            <div style={{ marginTop: '1rem' }}>
-                                <span style={{ color: 'var(--text-secondary)' }}>Division Steps:</span>
-                                <div style={{ maxHeight: '200px', overflowY: 'auto', marginTop: '0.5rem', fontSize: '0.8rem', background: '#000', padding: '0.5rem' }}>
+                            <div style={{ marginTop: '2rem' }}>
+                                <span style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '1rem', fontWeight: '500', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Division Log</span>
+                                <div className="step-list">
                                     {result.steps.map((step, idx) => (
-                                        <div key={idx} className="step-item">
-                                            <div>Div: {step.current_dividend}</div>
-                                            <div style={{ borderBottom: '1px dashed #333' }}>XOR: {step.divisor}</div>
+                                        <div key={idx} className="step-card" style={{ gap: '0.5rem', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
+                                                <span className="step-title">Step {idx + 1}</span>
+                                                <span className="step-icon" style={{ width: '24px', height: '24px', fontSize: '0.8rem' }}>÷</span>
+                                            </div>
+
+                                            <div style={{ fontFamily: 'monospace', fontSize: '1.2rem', letterSpacing: '3px', width: '100%' }}>
+                                                <div style={{ color: '#fff' }}>{step.current_dividend}</div>
+                                                <div style={{ color: 'var(--secondary)' }}>{step.divisor}</div>
+                                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', marginTop: '4px', paddingTop: '4px', color: 'var(--text-muted)' }}>
+                                                    {/* We don't have the result explicit in the step, but it is the next step's dividend (shifted). 
+                                                        Let's just show the XOR line. */}
+                                                    <span style={{ fontSize: '0.8rem', letterSpacing: '0', color: 'var(--text-muted)', fontFamily: 'sans-serif' }}>XOR Result shown in next step as new dividend</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

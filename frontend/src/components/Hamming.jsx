@@ -5,8 +5,29 @@ const Hamming = () => {
     const [data, setData] = useState('');
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+    const [validationError, setValidationError] = useState('');
+
+    const handleDataChange = (e) => {
+        const val = e.target.value;
+        setData(val);
+        setResult(null);
+        if (val && !/^[01]+$/.test(val)) {
+            setValidationError('Must be binary (0/1)');
+        } else {
+            setValidationError('');
+        }
+    };
 
     const handleCalculate = async () => {
+        if (!data) {
+            setValidationError('Required');
+            return;
+        }
+        if (!/^[01]+$/.test(data)) {
+            setValidationError('Must be binary (0/1)');
+            return;
+        }
+
         try {
             setError(null);
             const res = await axios.post('http://localhost:8000/api/hamming', { data });
@@ -36,29 +57,61 @@ const Hamming = () => {
                             type="text"
                             className="input-field"
                             value={data}
-                            onChange={(e) => setData(e.target.value)}
+                            onChange={handleDataChange}
                             placeholder="e.g. 1011"
+                            style={validationError ? { borderColor: 'var(--error)' } : {}}
                         />
+                        {validationError && <div style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.25rem' }}>{validationError}</div>}
                     </div>
 
                     <button className="btn-primary" onClick={handleCalculate}>Encode Hamming</button>
 
                     {result && (
-                        <div className="result-area">
-                            <div className="result-item">
-                                <span>Redundancy Bits (r):</span>
-                                <span>{result.redundancy_bits}</span>
+                        <div>
+                            <div style={{ marginTop: '2rem' }}>
+                                <span style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '1rem', fontWeight: '500', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Hamming Calculation Log</span>
+                                <div className="step-list">
+                                    {result.steps.map((step, idx) => (
+                                        <div key={idx} className="step-card" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <span className="step-icon" style={{ width: '28px', height: '28px', fontSize: '0.8rem', background: 'var(--primary-glow)' }}>P</span>
+                                                    <span className="step-title" style={{ color: '#fff', fontSize: '1rem', marginBottom: 0 }}>{step.parity}</span>
+                                                </div>
+                                                <span style={{ color: 'var(--success)', fontWeight: 'bold', fontSize: '1.2rem' }}>{step.result}</span>
+                                            </div>
+
+                                            <div style={{ width: '100%' }}>
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Positions Checked:</span>
+                                                    <span style={{ color: '#fff', fontFamily: 'monospace', fontSize: '0.9rem' }}>{step.covered}</span>
+                                                </div>
+
+                                                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', display: 'block', marginBottom: '0.25rem' }}>Parity Calculation (Even Parity):</span>
+                                                    <div style={{ fontFamily: 'monospace', color: '#cbd5e1', letterSpacing: '1px' }}>
+                                                        {step.bits_str.replace(/\+/g, '⊕')} = <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>{step.result}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="result-item">
-                                <span>Total Length:</span>
-                                <span>{result.total_length}</span>
-                            </div>
-                            <div className="result-item">
-                                <span>Encoded Word:</span>
-                                <span style={{ color: 'var(--success)', fontWeight: 'bold', letterSpacing: '2px' }}>{result.codeword}</span>
-                            </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                                Parity positions: {result.parity_positions.join(', ')}
+
+                            <div className="result-area" style={{ marginTop: '2rem', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
+                                <div className="result-item">
+                                    <span>Redundancy Bits (r):</span>
+                                    <span>{result.redundancy_bits}</span>
+                                </div>
+                                <div className="result-item">
+                                    <span>Total Length:</span>
+                                    <span>{result.total_length}</span>
+                                </div>
+                                <div className="result-item">
+                                    <span>Encoded Word:</span>
+                                    <span style={{ color: 'var(--success)', fontWeight: 'bold', letterSpacing: '4px', fontSize: '1.5rem' }}>{result.codeword}</span>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -76,7 +129,7 @@ const Hamming = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

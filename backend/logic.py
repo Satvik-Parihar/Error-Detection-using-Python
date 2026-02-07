@@ -161,16 +161,35 @@ def hamming_encode(data: str) -> dict:
                 data_idx += 1
     
     # Calculate parity bits on even parity
+    steps = []
+    
     for p in parity_indices:
         # Check bits where p-th bit is set
         xor_val = 0
+        covered_indices = []
+        bit_values = []
+        
         for i in range(1, total_len + 1):
             if (i & p) == p: # if position i has p bit set
-                # Only if it's a data bit (technically we can xor all, since initial parities are 0)
-                 if codeword[i] == '1':
+                covered_indices.append(str(i))
+                val = codeword[i]
+                # If it's the parity bit position itself, it's currently 0 placeholder
+                if i == p:
+                    bit_values.append(f"P{p}(?)")
+                else:
+                    bit_values.append(val)
+                
+                if val == '1':
                      xor_val ^= 1
         
         codeword[p] = str(xor_val)
+        
+        steps.append({
+            "parity": f"P{p}",
+            "covered": ", ".join(covered_indices),
+            "bits_str": " + ".join(bit_values), # e.g. P1(?) + 1 + 0 + 1
+            "result": str(xor_val)
+        })
         
     final_code = "".join(codeword[1:])
     
@@ -179,5 +198,6 @@ def hamming_encode(data: str) -> dict:
         "redundancy_bits": r,
         "total_length": total_len,
         "codeword": final_code,
-        "parity_positions": parity_indices
+        "parity_positions": parity_indices,
+        "steps": steps
     }

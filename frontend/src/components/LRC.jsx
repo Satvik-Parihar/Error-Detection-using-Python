@@ -2,16 +2,68 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const LRC = () => {
-    const [dataInput, setDataInput] = useState('');
+    const [blockSize, setBlockSize] = useState(8);
+    const [numBlocks, setNumBlocks] = useState(2);
+    const [blocks, setBlocks] = useState(['', '']);
     const [evenParity, setEvenParity] = useState(true);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+    const [validationErrors, setValidationErrors] = useState({});
+
+    const handleNumBlocksChange = (e) => {
+        const val = parseInt(e.target.value) || 0;
+        setNumBlocks(val);
+        setBlocks(prev => {
+            const newBlocks = [...prev];
+            if (val > prev.length) {
+                for (let i = prev.length; i < val; i++) newBlocks.push('');
+            } else {
+                newBlocks.length = val;
+            }
+            return newBlocks;
+        });
+        setValidationErrors({});
+        setResult(null);
+    };
+
+    const handleBlockSizeChange = (e) => {
+        setBlockSize(parseInt(e.target.value) || 0);
+        setValidationErrors({});
+        setResult(null);
+    };
+
+    const handleBlockChange = (index, val) => {
+        const newBlocks = [...blocks];
+        newBlocks[index] = val;
+        setBlocks(newBlocks);
+
+        const errors = { ...validationErrors };
+        if (!/^[01]*$/.test(val)) {
+            errors[index] = 'Must be binary (0/1)';
+        } else if (val.length !== blockSize) {
+            errors[index] = `Must be ${blockSize} bits`;
+        } else {
+            delete errors[index];
+        }
+        setValidationErrors(errors);
+        setResult(null);
+    };
 
     const handleCalculate = async () => {
+        const errors = {};
+        blocks.forEach((block, idx) => {
+            if (!block) errors[idx] = 'Required';
+            else if (!/^[01]+$/.test(block)) errors[idx] = 'Must be binary';
+            else if (block.length !== blockSize) errors[idx] = `Must be ${blockSize} bits`;
+        });
+
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
+            return;
+        }
+
         try {
             setError(null);
-            // Split input by comma or space
-            const blocks = dataInput.split(/[ ,]+/).filter(x => x.trim() !== '');
             const res = await axios.post('http://localhost:8000/api/lrc', { data_blocks: blocks, even_parity: evenParity });
             setResult(res.data);
         } catch (err) {
@@ -33,15 +85,52 @@ const LRC = () => {
                 <div className="card">
                     <h2 className="card-title">Simulation</h2>
 
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                        <div className="input-group">
+                            <label className="input-label">Block Size (bits)</label>
+                            <input
+                                type="number"
+                                className="input-field"
+                                value={blockSize}
+                                onChange={handleBlockSizeChange}
+                                min="1"
+                                placeholder="8"
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label className="input-label">Number of Blocks</label>
+                            <input
+                                type="number"
+                                className="input-field"
+                                value={numBlocks}
+                                onChange={handleNumBlocksChange}
+                                min="1"
+                                placeholder="2"
+                            />
+                        </div>
+                    </div>
+
                     <div className="input-group">
-                        <label className="input-label">Data Blocks (space separated, e.g. 1100 1010 0011)</label>
-                        <input
-                            type="text"
-                            className="input-field"
-                            value={dataInput}
-                            onChange={(e) => setDataInput(e.target.value)}
-                            placeholder="1100 1010"
-                        />
+                        <label className="input-label">Data Blocks</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {blocks.map((block, idx) => (
+                                <div key={idx} style={{ position: 'relative' }}>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        value={block}
+                                        onChange={(e) => handleBlockChange(idx, e.target.value)}
+                                        placeholder={`Block ${idx + 1} (${blockSize} bits)`}
+                                        style={validationErrors[idx] ? { borderColor: 'var(--error)' } : {}}
+                                    />
+                                    {validationErrors[idx] && (
+                                        <div style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                                            {validationErrors[idx]}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="input-group">
