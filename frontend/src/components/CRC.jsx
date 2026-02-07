@@ -133,14 +133,13 @@ const CRC = () => {
                     <h2 className="card-title">Theory & Method</h2>
                     <div className="theory-text">
                         <p>
-                            CRC is based on binary division. A sequence of redundant bits, called the CRC remainder, is appended to the end of a data unit.
+                            <strong>Working:</strong> CRC treats data blocks as coefficients of a polynomial. It divides the data by a predetermined generator polynomial using binary division. The remainder of this division (the CRC) is attached to the data.
                         </p>
                         <h3>Key Points:</h3>
                         <ul>
-                            <li>(n-1) zeros are appended to the data (where n is divisor length).</li>
-                            <li>Binary division is performed on the padded data.</li>
-                            <li>The remainder of the division is the CRC.</li>
-                            <li>CRC is appended to the original data for transmission.</li>
+                            <li><strong>Function:</strong> A robust method based on binary division to detect changes in raw data.</li>
+                            <li><strong>Efficiency:</strong> Extremely distinct and reliable; it can detect all single-bit, double-bit, and odd numbers of errors, as well as most burst errors.</li>
+                            <li><strong>Drawback:</strong> More computationally intensive to implement in software compared to Checksum or VRC.</li>
                         </ul>
                     </div>
                 </div>

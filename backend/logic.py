@@ -141,8 +141,6 @@ def hamming_encode(data: str) -> dict:
     codeword = ['0'] * (total_len + 1) # 1-based indexing for easier calc
     
     # Place data bits
-    j = 0
-    data_reversed = data[::-1] # D1 is LSB? Or MSB? usually D1..Dn. Let's assume input text order.
     # We place data bits in non-power-of-2 positions.
     
     # 1-based index mapping

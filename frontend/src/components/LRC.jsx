@@ -173,14 +173,13 @@ const LRC = () => {
                     <h2 className="card-title">Theory & Method</h2>
                     <div className="theory-text">
                         <p>
-                            LRC organizes data into a table (rows and columns) and calculates parity for each column.
+                            <strong>Working:</strong> LRC organizes data into a 2D matrix (block of rows). It calculates a parity bit for each vertical column, creating a new row of parity bits (the LRC byte) that gets appended to the block.
                         </p>
                         <h3>Key Points:</h3>
                         <ul>
-                            <li>Data is arranged in a matrix of rows and columns.</li>
-                            <li>Parity bit is calculated for each column.</li>
-                            <li>The sequence of these parity bits forms the LRC block.</li>
-                            <li>It improves upon VRC by detecting burst errors.</li>
+                            <li><strong>Function:</strong> Detects errors by validating the parity of each column in a block of data.</li>
+                            <li><strong>Efficiency:</strong> Increases the likelihood of detecting burst errors compared to VRC.</li>
+                            <li><strong>Drawback:</strong> It cannot detect errors if two bits at the same position in two different data units are damaged (a specific rectangular error pattern).</li>
                         </ul>
                     </div>
                 </div>

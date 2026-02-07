@@ -119,13 +119,13 @@ const VRC = () => {
                     <h2 className="card-title">Theory & Method</h2>
                     <div className="theory-text">
                         <p>
-                            VRC checks errors on a per-character basis. It appends a single bit to make the total number of 1s either even (Even Parity) or odd (Odd Parity).
+                            <strong>Working:</strong> VRC appends a single redundant bit (parity bit) to the data unit. The bit's value (0 or 1) is chosen to make the total number of 1s in the unit either even (Even Parity) or odd (Odd Parity).
                         </p>
                         <h3>Key Points:</h3>
                         <ul>
-                            <li>Cheap and easy to implement.</li>
-                            <li>Can detect single-bit errors.</li>
-                            <li>Cannot detect even numbers of flipped bits (e.g. 2 bits flipped).</li>
+                            <li><strong>Function:</strong> A simple mechanism to check data integrity on a character-by-character basis.</li>
+                            <li><strong>Efficiency:</strong> Extremely inexpensive to implement and can detect all single-bit errors.</li>
+                            <li><strong>Drawback:</strong> Ineffective if an even number of bits are flipped (e.g., two bits change from 0 to 1), as the parity count remains valid.</li>
                         </ul>
                     </div>
                 </div>

@@ -122,7 +122,7 @@ const Hamming = () => {
                     <h2 className="card-title">Theory & Method</h2>
                     <div className="theory-text">
                         <p>
-                            Hamming codes add redundant bits at specific positions to enable error detection and correction.
+                            <strong>Working:</strong> Hamming code adds check bits at power-of-2 positions. Each check bit is a parity bit for a specific set of data bits. By checking these parities, the receiver can not only detect if an error occurred but locate exactly which bit was flipped.
                         </p>
                         <h3>Formula:</h3>
                         <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', fontFamily: 'monospace', fontSize: '1.2rem', textAlign: 'center', margin: '1rem 0' }}>
@@ -132,9 +132,9 @@ const Hamming = () => {
 
                         <h3>Key Points:</h3>
                         <ul>
-                            <li>Redundant bits are placed at power-of-2 positions (1, 2, 4, 8...).</li>
-                            <li>Each parity bit checks a specific set of bits in the codeword.</li>
-                            <li>Can detect up to 2-bit errors and correct 1-bit errors (SEC-DED).</li>
+                            <li><strong>Function:</strong> A forward error correction (FEC) code that can detect and correct bit errors without retransmission.</li>
+                            <li><strong>Efficiency:</strong> Capable of correcting any single-bit error and detecting (but not correcting) two-bit errors.</li>
+                            <li><strong>Drawback:</strong> It requires significant redundancy (overhead) and is inefficient for correcting burst errors involving many bits.</li>
                         </ul>
                     </div>
                 </div>
